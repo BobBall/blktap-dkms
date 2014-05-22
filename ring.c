@@ -27,6 +27,7 @@
 #include <linux/blkdev.h>
 #include <linux/mman.h>
 #include <linux/mm.h>
+#include <linux/version.h>
 
 /* VM_RESERVED has disappeared starting from Linux 3.7 and has been
  * replaced by VM_DONTDUMP since then.
@@ -311,7 +312,12 @@ blktap_ring_make_tr_request(struct blktap *tap,
 	unsigned int nsecs;
 
 	breq->u.tr.nr_sectors    = nsecs = bio_sectors(bio);
+/* bi_sector moved in 4f024f3797c43cb4b73cd2c50cec728842d0e49e */
+#if ( LINUX_VERSION_CODE < KERNEL_VERSION(3,14,0) )
 	breq->u.tr.sector_number = bio->bi_sector;
+#else
+	breq->u.tr.sector_number = bio->bi_iter.bi_sector;
+#fi
 
 	return nsecs;
 }
